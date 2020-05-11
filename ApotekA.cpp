@@ -2,23 +2,23 @@
 #include <stdlib.h>
 #include <iomanip>
 #include <conio.h>
+#define MAX 5
 using namespace std;
-// sasasas
-bool ketemu=false;
-bool TempRegisAdmin=false;
-int i, pil,x,pos,n=1, tempRegis=n,ubahData;
-double topup,beli;
-long int pin,id;
-string LogUser;
+
+bool ketemu=false, notif=false;
+int i, pil,x,pos,pos2,n=0, p=0,JumlahUser,JumlahAgen,tempTopup,tempSaldo;
+double topup,beli,setor,tempSaldoAgen[50];
+long int pin;
+string LogUser,UsernameAgen,UsernameUser,pw,ubahData,tempUser,tempUserAgen[50];
 string LogAdmin;
 
 
 struct user
 {
-	char nama[50];
-	char pass[50];
+	string nama;
+	string pass;
 	string alamat;
-	long int NomerID;
+	string username;
 	double saldo;
 };
 
@@ -44,11 +44,43 @@ void DataAkun(user &usr);
 void UbahData();
 void MenuAdmin();
 void AdminProsesLogin();
+void RegisUser();
 
 	
 	user usr[50];
 	admin adm[10];
 	obat obt[50];
+
+string AntrianUser[MAX];
+int AntrianSaldoUser[MAX];
+int headUser=-1;
+int tailUser=-1;
+
+bool IsEmptyUser(){ 
+   if(tailUser == -1){
+       return true;
+   }else{
+       return false;
+   }
+}
+
+bool IsFullUser(){ // FUNGSI UNTUK MENUNJUKAN JIKA TAIL = MAX-1
+   if(tailUser == MAX-1){
+       return true;
+   }else{
+       return false;
+   }
+}
+
+void AntrianMasukUser(string antriUser, int antriSaldoUser){
+    if (IsEmptyUser()){
+        headUser=tailUser=0;
+    }else {
+        tailUser++;
+    }
+    AntrianUser[tailUser]=antriUser;
+    AntrianSaldoUser[tailUser]=antriSaldoUser;
+}
 
 
 int main()
@@ -88,44 +120,13 @@ int main()
 	        
 	        if(pil==1)
 	        {
-				lagi:
-					system("cls");
-					cout<<"Cek Ketersediaan ID : ";
-					cin>>id;
-					for (i=0; i<n; i++)
-					{
-						if(id==usr[i].NomerID)
-						{
-							ketemu=true;
-						}
-						else
-						{
-							ketemu=false;
-						}
-					}
-					if(ketemu)
-					{
-						cout<<"ID anda Sudah terpakai, silakan cari lagi";
-						getch();
-						goto lagi;
-					}
-					else
-					{	
-						cout<<"ID Anda pilih kosong  dan sudah kami daftarkan"<<endl;
-						cout<<"Masukan Nama Anda : ";
-						cin>>usr[n].nama;
-						cout<<"Masukan Password Akun anda : ";
-						cin>>usr[n].pass;
-						cout<<"Masukan alamat anda : ";
-						cin>>usr[n].alamat;
-					}
-					n=n+1;
-					usr[i].NomerID=id;
-					goto menu;
+				RegisUser();
+				goto menu;
 			}
 			if(pil==2)
 	        {
-
+				TopUp();
+				goto menu;
 				
 			}
 			if(pil==3)
@@ -145,6 +146,47 @@ int main()
 		}
 	
 	
+}
+
+void RegisUser()
+{ketemu=false;
+	lagi:
+					system("cls");
+					cout<<"Cek Ketersediaan Username : ";
+					cin>>UsernameUser;
+					for (i=0; i<n; i++)
+					{
+						if(UsernameUser==usr[i].username)
+						{
+							ketemu=true;
+							
+						}
+						else
+						{
+							ketemu=false;
+						}
+					}
+					if(ketemu)
+					{
+						cout<<"Username anda Sudah terpakai, silakan cari lagi";
+						getch();
+						goto lagi;
+					}
+					else
+					{	
+						cout<<"Username yang anda pilih kosong  dan sudah kami daftarkan"<<endl;
+						cout<<"Masukan Nama Anda : ";
+						cin>>usr[n].nama;
+						cout<<"Masukan Password Akun anda : ";
+						cin>>usr[n].pass;
+						cout<<"Masukan alamat anda : ";
+						cin>>usr[n].alamat;
+						JumlahUser=JumlahUser+1;
+					}
+					n=n+1;
+					cout<<n;
+					getch();
+					usr[i].username=UsernameUser;
 }
 
 void AdminProsesLogin()
@@ -218,10 +260,104 @@ void DataAkun(user &usr)
 
 void TopUp()
 {
-	
+	cout<<"Masukan Username Anda : ";
+	cin>>UsernameUser;
+	cout<<"Masukan Password Anda : ";
+	cin>>pw;
+	for(i=0; i<n; i++)
+	{
+		if(UsernameUser==usr[i].username && pw==usr[i].pass)
+		{
+			notif=true;
+			cout<<"Masukan Nominal Saldo TopUp : ";
+			cin>>setor;
+			pos=i;
+			break;
+		}
+		else
+		{
+			notif=false;
+		}
+	}
+	if(notif)
+	{
+		tempUser=UsernameUser;
+		tempSaldo=setor;
+		AntrianMasukUser(tempUser, tempSaldo);
+		tempTopup=tempTopup+1;
+		
+		cout<<"Silakan melakukan konfirmasi pembayaran ke Agen";
+		getch();
+	}
+	else
+	{
+		cout<<"Akun anda tidak ditemukan";
+	}
 }
 void AccTopup()
 {
+	if(IsEmptyUser())
+	{	
+		cout<<"Tidak ada Permintaan saldo";
+		getch();
+	}
+	else
+	{
+			
+	     		for(i=headUser; i<=tailUser; i++)
+				{
+					cout<<"Username : "<<AntrianUser[i]<<endl;
+					cout<<"Saldo yang dipesan : "<<AntrianSaldoUser[i]<<endl;
+				}
+				cout<<"========================"<<endl;
+				
+					cout<<"Masukan Username yang ingin di TopUp : ";
+					cin>>UsernameUser;				
+					for(int a=headUser; a<=tailUser; a++)
+					{	
+							if(UsernameUser==AntrianUser[a])
+							{	int pos3=a;
+									for(i=0; i<n; i++)
+									{
+										if(UsernameUser==usr[i].username)
+										{
+											notif=true;
+											pos=i;
+											break;
+										}
+										else
+										{
+											notif=false;
+										}
+									}
+									if(notif)
+									{
+										
+										usr[pos].saldo=usr[pos].saldo+AntrianSaldoUser[pos3];
+										cout<<"saldo Berhasil Di TopUp"<<endl;
+										cout<<"Jumlah saldo yang User : Rp."<<usr[pos].saldo<<endl;
+										getch();
+									}
+									else
+									{
+										cout<<"Username tidak ada";
+										break;
+									}
+								//Antrian Keluar
+									
+					            AntrianUser[pos3]=AntrianUser[pos3+1];
+					            AntrianSaldoUser[pos3]=AntrianSaldoUser[pos3+1];
+						        if(tailUser == -1){
+						            headUser = -1;
+	            							        }									
+							}				
+					}
+					tailUser--;
+				
+			
+		
+		
+	}
 	
 }
 void CekListObat()
@@ -253,7 +389,8 @@ void MenuAdmin()
 	        cin>>pil;
 	        if(pil==1)
 	        {
-	        	
+	        	AccTopup();
+	        	goto admin;
 			}
 			if(pil==2)
 	        {
@@ -271,5 +408,3 @@ void MenuAdmin()
 
 
 }
-
-
