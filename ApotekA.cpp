@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <conio.h>
 using namespace std;
-
+// sasasas
 bool ketemu=false;
 bool TempRegisAdmin=false;
 int i, pil,x,pos,n=1, tempRegis=n,ubahData;
